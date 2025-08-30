@@ -1,11 +1,107 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { HeroSection } from "@/components/HeroSection";
+import { CandidateProfile } from "@/components/CandidateProfile";
+import { AssessmentPanel } from "@/components/AssessmentPanel";
+import { AssessmentHistory } from "@/components/AssessmentHistory";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
+import { useAssessments } from "@/hooks/useAssessments";
 
 const Index = () => {
+  const { toast } = useToast();
+  const [showAssessment, setShowAssessment] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentScores, setCurrentScores] = useState<[string, number][]>([]);
+  
+  const {
+    assessments,
+    currentResume,
+    reportReady,
+    generateNewCandidate,
+    generateScores,
+    submitAssessment,
+    runReport
+  } = useAssessments();
+
+  const handleGetStarted = () => {
+    setShowAssessment(true);
+    handleGenerateNewCandidate();
+  };
+
+  const handleGenerateNewCandidate = () => {
+    generateNewCandidate();
+    // Need to get the new resume after generating
+    setTimeout(() => {
+      const scores = generateScores(currentResume);
+      setCurrentScores(scores);
+    }, 100);
+  };
+
+  const handleSubmitAssessment = async (choice: number, explanation: string) => {
+    setIsSubmitting(true);
+    
+    try {
+      submitAssessment(currentResume, currentScores, choice, explanation);
+      
+      toast({
+        title: "Assessment Submitted!",
+        description: "Your assessment has been recorded. Generate a new candidate to continue.",
+        variant: "default"
+      });
+      
+      // Auto-generate new candidate after successful submission
+      setTimeout(() => {
+        handleGenerateNewCandidate();
+        setIsSubmitting(false);
+      }, 1000);
+      
+    } catch (error) {
+      toast({
+        title: "Submission Failed",
+        description: "There was an error submitting your assessment. Please try again.",
+        variant: "destructive"
+      });
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!showAssessment) {
+    return (
+      <div className="min-h-screen p-6">
+        <div className="max-w-4xl mx-auto">
+          <HeroSection onGetStarted={handleGetStarted} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen p-6 space-y-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Assessment Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <CandidateProfile 
+            resume={currentResume}
+            onGenerate={handleGenerateNewCandidate}
+          />
+          <AssessmentPanel
+            scores={currentScores}
+            onSubmit={handleSubmitAssessment}
+            isSubmitting={isSubmitting}
+          />
+        </div>
+
+        {/* History Section */}
+        {assessments.length > 0 && (
+          <AssessmentHistory assessments={assessments} />
+        )}
+
+        {/* Analytics Section */}
+        <AnalyticsDashboard
+          assessments={assessments}
+          onRunReport={runReport}
+          reportReady={reportReady}
+        />
       </div>
     </div>
   );
