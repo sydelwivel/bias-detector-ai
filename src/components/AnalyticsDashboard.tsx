@@ -7,7 +7,7 @@ import { BarChart3, TrendingUp, Download, AlertCircle } from "lucide-react";
 import { Assessment, PerformanceStats, BiasMetrics } from "@/types";
 import { MetricCard } from "./MetricCard";
 import { binomialTest, klDivergence, jsDivergence, earthMoversDistance } from "@/utils/mockData";
-
+import { generateComplianceReport } from "@/utils/report";
 interface AnalyticsDashboardProps {
   assessments: Assessment[];
   onRunReport: () => void;
@@ -186,7 +186,22 @@ export const AnalyticsDashboard = ({ assessments, onRunReport, reportReady }: An
                   variant="success"
                 />
                 <div className="pt-4">
-                  <Button variant="accent" className="gap-2">
+<Button 
+                    variant="accent" 
+                    className="gap-2"
+                    onClick={() => {
+                      const html = generateComplianceReport(assessments);
+                      const blob = new Blob([html], { type: "text/html" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "fairness_report.html";
+                      document.body.appendChild(a);
+                      a.click();
+                      a.remove();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
                     <Download className="h-4 w-4" />
                     Download Compliance Report
                   </Button>
