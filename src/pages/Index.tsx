@@ -25,16 +25,16 @@ const Index = () => {
 
   const handleGetStarted = () => {
     setShowAssessment(true);
-    handleGenerateNewCandidate();
+    // Initialize scores immediately
+    const initialScores = generateScores(currentResume);
+    setCurrentScores(initialScores);
   };
 
   const handleGenerateNewCandidate = () => {
     generateNewCandidate();
-    // Need to get the new resume after generating
-    setTimeout(() => {
-      const scores = generateScores(currentResume);
-      setCurrentScores(scores);
-    }, 100);
+    // Generate scores for the new candidate
+    const newScores = generateScores(currentResume);
+    setCurrentScores(newScores);
   };
 
   const handleSubmitAssessment = async (choice: number, explanation: string) => {

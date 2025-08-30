@@ -4,7 +4,9 @@ import { mockResumes, biasPersonas, aiMockScore } from "@/utils/mockData";
 
 export const useAssessments = () => {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
-  const [currentResumeIndex, setCurrentResumeIndex] = useState(0);
+  const [currentResumeIndex, setCurrentResumeIndex] = useState(() => 
+    Math.floor(Math.random() * mockResumes.length)
+  );
   const [reportReady, setReportReady] = useState(false);
 
   const getCurrentResume = useCallback((): Resume => {

@@ -18,6 +18,21 @@ export const AssessmentPanel = ({ scores, onSubmit, isSubmitting }: AssessmentPa
   const [explanation, setExplanation] = useState("");
   const [showWarning, setShowWarning] = useState(false);
 
+  // Add validation for scores array
+  if (!scores || scores.length < 2) {
+    return (
+      <Card className="glass p-6 space-y-6 animate-slide-up">
+        <div className="flex items-center gap-2">
+          <Brain className="h-5 w-5 text-primary" />
+          <h3 className="text-xl font-semibold">Review and Assess</h3>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Generating candidate scores...</p>
+        </div>
+      </Card>
+    );
+  }
+
   const handleSubmit = () => {
     if (!choice) {
       setShowWarning(true);
